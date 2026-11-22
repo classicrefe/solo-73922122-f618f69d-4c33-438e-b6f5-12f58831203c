@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>积水格入仓 · 巡查包演示</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header>
+  <h1>积水格入仓</h1>
+  <p class="sub">巡查包入库 · 覆盖范围与现行积水一起生效 · 矩形左闭右开、行列均为整数</p>
+</header>
+
+<main>
+  <section class="card" id="import-card">
+    <div class="card-head">
+      <h2>1 · 导入巡查包</h2>
+      <span class="hint">同版同内容重传不改变结果；同版异内容整包退回。</span>
+    </div>
+    <div class="row">
+      <input type="file" id="file-input" accept=".json,application/json">
+      <button id="load-file-btn" class="secondary" type="button">读取文件到文本框</button>
+    </div>
+    <textarea id="package-json" spellcheck="false" placeholder='{"version": 1, "coverage": {...}, "wet_cells": [[r, c], ...]}'></textarea>
+    <div class="row wrap">
+      <button id="import-btn" type="button">导入</button>
+      <span class="samples">
+        示例：
+        <button class="chip" data-sample="v3.json" type="button">v3 首次巡查</button>
+        <button class="chip" data-sample="v7.json" type="button">v7 覆盖并覆盖旧结果</button>
+        <button class="chip" data-sample="v5-late.json" type="button">v5 旧包晚到</button>
+        <button class="chip" data-sample="v7-retry.json" type="button">v7 同内容重传</button>
+        <button class="chip danger" data-sample="v7-conflict.json" type="button">v7 异内容</button>
+        <button class="chip" id="reset-btn" type="button">清空演示库</button>
+      </span>
+    </div>
+    <div id="import-result" class="result" hidden></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>2 · 已入仓巡查包</h2>
+      <span class="hint" id="package-stats"></span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>版号</th>
+            <th>覆盖矩形（左闭右开）</th>
+            <th>包内积水点</th>
+            <th>现行积水点</th>
+            <th>摘要</th>
+            <th>入库时间</th>
+          </tr>
+        </thead>
+        <tbody id="package-rows"><tr><td colspan="6" class="empty">尚无巡查包</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>3 · 框查现行积水格</h2>
+      <span class="hint">只读取现行状态，不回放历史积水点。</span>
+    </div>
+    <form id="box-form" class="row wrap">
+      <label>行 [start, end)
+        <input type="number" name="row_start" value="0" required>
+        <input type="number" name="row_end" value="30" required>
+      </label>
+      <label>列 [start, end)
+        <input type="number" name="col_start" value="0" required>
+        <input type="number" name="col_end" value="30" required>
+      </label>
+      <label>最多返回
+        <input type="number" name="limit" value="2000" min="1" max="5000">
+      </label>
+      <button type="submit">框查</button>
+    </form>
+    <p id="box-summary" class="hint"></p>
+    <div class="map-wrap">
+      <svg id="map" viewBox="0 0 100 100" role="img" aria-label="框查结果地图"></svg>
+      <div class="legend">
+        <span><i class="swatch wet"></i>有积水</span>
+        <span><i class="swatch surveyed"></i>已查无积水（覆盖范围内）</span>
+        <span><i class="swatch unsurveyed"></i>未巡查（覆盖范围外）</span>
+        <span><i class="swatch frame"></i>框查范围</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>行</th><th>列</th><th>生效版号</th></tr></thead>
+        <tbody id="wet-rows"><tr><td colspan="3" class="empty">尚未框查</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>4 · 单格查询</h2>
+      <span class="hint">显示：有积水 / 已查无积水 / 未巡查。</span>
+    </div>
+    <form id="cell-form" class="row wrap">
+      <label>行 <input type="number" name="row" value="0" required></label>
+      <label>列 <input type="number" name="col" value="0" required></label>
+      <button type="submit">查询单格</button>
+    </form>
+    <div id="cell-result" class="result" hidden></div>
+  </section>
+</main>
+
+<footer>
+  <span>演示数据仅存于本地 SQLite；覆盖范围以矩形存储，不逐格展开。</span>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

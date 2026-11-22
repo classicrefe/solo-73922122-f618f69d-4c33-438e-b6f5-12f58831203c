@@ -1,0 +1,15 @@
+services:
+  flood:
+    build: .
+    image: flood-cells:local
+    ports:
+      - "8000:8000"
+    environment:
+      FLOOD_DB: /data/flood.sqlite3
+      FLOOD_ALLOW_RESET: "1"   # enables the demo "清空演示库" button
+    volumes:
+      - flood-data:/data
+    restart: unless-stopped
+
+volumes:
+  flood-data:
